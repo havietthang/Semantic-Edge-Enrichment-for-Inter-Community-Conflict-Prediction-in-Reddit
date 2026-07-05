@@ -1,8 +1,8 @@
 # Semantic Edge Enrichment for Inter-Community Conflict Prediction in Reddit
 
-We use LLM-derived semantic labels to improve and explain inter-community conflict prediction in Reddit cross-community links. Our study revisits the Stanford SNAP Reddit Hyperlink Network conflict-prediction setting and asks whether simple plain-language semantic labels can add useful predictive signal beyond the original handcrafted, social, graph, and text features.
+We use LLM-derived semantic labels to improve and explain inter-community conflict prediction in Reddit cross-community links. We revisit the Stanford SNAP Reddit Hyperlink Network conflict-prediction setting and ask whether simple plain-language semantic labels can add useful predictive signal beyond the original handcrafted, social, graph, and text features.
 
-We annotate all 116,224 crosslink entries with two LLM annotators, Gemini 2.5 Flash-Lite and GPT-4o mini. Each annotator sees only the recovered post text, source subreddit, target subreddit, and a non-outcome text-quality flag. We hide the outcome label, train/validation/test split, future behavior, target-derived features, and model predictions from the annotators.
+We annotate all **116,224** crosslink entries with two LLM annotators: **Gemini 2.5 Flash-Lite** and **GPT-4o mini**. Each annotator sees only the recovered post text, source subreddit, target subreddit, and a non-outcome text-quality flag. We hide the outcome label, train/validation/test split, future behavior, target-derived features, and model predictions from the annotators.
 
 Our main conclusion is that semantic enrichment is useful, but not automatic. Semantic labels improve the simple RF500 metafeature baseline for both annotators. In feature-rich models that already use LSTM, social, graph, and metafeature representations, gains are smaller because many semantic labels are already predictable from the original features. The strongest result comes from the Gemini-based redundancy-aware semantic system.
 
@@ -10,7 +10,7 @@ Our main conclusion is that semantic enrichment is useful, but not automatic. Se
 
 ## Repository Layout
 
-We keep this repository intentionally simple. We use one large README instead of separate documentation files. This README contains the project description, notebook order, data-access notes, reproducibility notes, figure manifest, table summaries, citation text, and responsible-use notes.
+We keep this repository intentionally simple. We use one large README instead of separate documentation files. This README contains the project description, notebook order, data-access notes, reproducibility notes, software/API notes, figure explanations, table summaries, citation text, and responsible-use notes.
 
 ```text
 .
@@ -79,7 +79,7 @@ Run the notebooks in this order.
 | 3 | `03_model_training_evaluation_gemini25_flashlite_semantics.ipynb` | Train and evaluate original and Gemini-semantic models; generate Gemini tables and figures. | Colab A100 High-RAM preferred; L4/T4 can work but may be slower. |
 | 4 | `04_model_training_evaluation_gpt4o_mini_semantics.ipynb` | Train and evaluate original and GPT-semantic models; generate GPT tables and figures. | Colab A100 High-RAM preferred; L4/T4 can work but may be slower. |
 
-We recommend running the annotation notebooks first, then the model notebooks. The annotation notebooks save outputs incrementally so that interrupted Colab sessions can resume instead of restarting from zero.
+We recommend running the annotation notebooks first, then the model notebooks. The annotation notebooks save outputs incrementally so interrupted Colab sessions can resume instead of restarting from zero.
 
 ---
 
@@ -108,7 +108,7 @@ If a notebook uses a different folder name, update the `PROJECT_ROOT` or equival
 
 ## Software and API Notes
 
-We do not include `requirements.txt` or `environment.yml` in this minimal repository. The notebooks install or import the packages they need inside the notebook cells.
+We do not include `requirements.txt` or `environment.yml` in this minimal repository. The notebooks install or import the packages they need inside notebook cells.
 
 Typical packages used across the notebooks include:
 
@@ -139,7 +139,9 @@ Each example is a directed Reddit crosslink from a source community to a target 
 
 We preserve the original train/validation/test split throughout the experiments. The held-out validation and test splits are imbalanced, with a positive rate of about 16%. We therefore use PR-AUC as the main selection and interpretation metric, while also reporting ROC-AUC.
 
-**Supporting figure:** [Fig. 1: Reddit community space](figures/fig01_reddit_community_space.png). We use this figure only as descriptive context. Coral nodes indicate communities that initiate more negative cross-community links; teal nodes indicate other communities. Topic outlines are visual guides only and are not used as model features.
+The figure below is supporting material for the dataset description. We use it only as descriptive context. Coral nodes indicate communities that initiate more negative cross-community links; teal nodes indicate other communities. Topic outlines are visual guides only and are not used as model features.
+
+![Fig. 1. Descriptive visualization of Reddit communities in the SNAP Reddit Hyperlink Network setting.](figures/fig01_reddit_community_space.png)
 
 ### Table 1. Semantic Coverage by Annotator
 
@@ -158,7 +160,9 @@ We annotate each crosslink using only recovered post text, source community, tar
 
 Each model returns one primary label, seven independent boolean attributes, and a short audit reason. The short reason is used for inspection only and is not used as a predictive feature. The predictive semantic representation contains 14 features: seven boolean columns and seven one-hot primary-label columns.
 
-**Supporting figure:** [Fig. 2: Semantic enrichment pipeline](figures/fig02_semantic_enrichment_pipeline.png). We use this figure as a workflow schematic for the leakage-controlled annotation and evaluation protocol.
+The figure below is supporting material for the annotation protocol. It summarizes the leakage-controlled pipeline from Reddit crosslinks to semantic features, matched model comparisons, residuals/interactions, and evaluation.
+
+![Fig. 2. Semantic enrichment and evaluation pipeline.](figures/fig02_semantic_enrichment_pipeline.png)
 
 ### Primary Label Options
 
@@ -238,14 +242,14 @@ In matched comparisons, each original model is paired with a semantic version us
 |---|---|
 | RF500 metafeatures | Tests whether semantic labels help when the base model has only handcrafted original metafeatures. |
 | RF500 full features | Tests whether semantic labels still help after adding richer original features. |
-| SocialLSTM variants | Tests whether semantic labels help recurrent text/social models. |
-| Enhanced boosted trees | Tests semantic augmentation under stronger tabular learners. |
+| SocialLSTM-style models | Tests semantic enrichment with socially primed recurrent representations. |
+| Enhanced boosted tree models | Tests semantic augmentation under stronger feature-rich tabular learners. |
 
 ### Redundancy-Aware Semantic-Aware Models
 
-The semantic-aware system combines original full features, raw semantic labels, semantic residuals, semantic-original interactions, and validation-selected gradient boosting.
+We also train semantic-aware models that combine original full features, raw semantic labels, semantic residuals, semantic-original interactions, and validation-selected gradient boosting. The motivation is that semantic labels may already be encoded indirectly in text, social, or graph representations.
 
-For each semantic label `s_j`, we train an auxiliary model to predict the semantic label from the original representation `x`:
+For each semantic label `s_j`, an auxiliary model predicts the label from the original full representation `x`:
 
 ```text
 s_hat_j = f_j(x)
@@ -257,37 +261,36 @@ The residualized semantic feature is:
 r_j = s_j - s_hat_j
 ```
 
-We use residuals because semantic labels may already be indirectly encoded in the original text, social, and graph representations. Residualized labels are intended to preserve semantic information that is not already predictable from original features.
+The residual is intended to capture semantic information not already predictable from the original representation. Targeted interactions allow semantic labels to matter conditionally on strong original features.
 
 ### Evaluation Rules
 
-We preserve the original train/validation/test split. We use validation PR-AUC for model selection and evaluate the test split only after selection. F1 thresholds are chosen on validation predictions and then applied unchanged to the test split.
-
-| Evaluation detail | Protocol |
-|---|---|
-| Main selection metric | Validation PR-AUC |
-| Final test metrics | ROC-AUC, PR-AUC, F1 |
-| F1 threshold | Selected on validation, applied once to test |
-| Deterministic model uncertainty | Paired bootstrap over held-out test examples |
-| LSTM stability | Multiple random seeds |
-| Leakage control | No outcome labels, future behavior, split membership, target-derived features, or model predictions are shown to annotators |
+We preserve the original split, use validation PR-AUC for model selection, and evaluate the test split only after selection. F1 thresholds are chosen on validation predictions and then applied unchanged to the test split. For deterministic tabular models, uncertainty intervals use paired bootstrap resampling over held-out test examples. For LSTM models, we run multiple random seeds where applicable to estimate seed stability.
 
 ---
 
-## Results
+## Main Results
 
 ### Table 2. Main PR-AUC Results by Annotator
 
-RF500 rows measure matched direct semantic augmentation. Semantic-aware rows compare validation-selected original and semantic-aware systems.
+RF500 rows measure matched direct semantic augmentation. Semantic-aware rows compare validation-selected original and semantic-aware models.
 
-| Annotator | Comparison | Original PR-AUC | Semantic PR-AUC | Delta PR-AUC |
+| Annotator | Comparison | Original PR-AUC | Semantic PR-AUC | Δ PR-AUC |
 |---|---|---:|---:|---:|
 | Gemini | RF500 metafeatures | 0.2782 | 0.2846 | +0.0063 |
 | GPT-4o mini | RF500 metafeatures | 0.2790 | 0.2874 | +0.0084 |
 | Gemini | Semantic-aware model | 0.4408 | 0.4487 | +0.0079 |
 | GPT-4o mini | Semantic-aware model | 0.4450 | 0.4429 | -0.0021 |
 
-### Table 3. Selected Original vs Semantic-Aware Systems on Held-Out Test Split
+Both annotators improve the RF500 metafeature baseline. This is the cleanest direct semantic gain: adding low-dimensional semantic labels helps when the base model has only handcrafted metafeatures. The feature-rich semantic-aware result differs by annotator: Gemini improves PR-AUC after residualization and interactions, while GPT-4o mini does not improve PR-AUC in the analogous semantic-aware setting.
+
+The two figures below support this result section. We keep them next to the table because they show the PR-AUC values and semantic-minus-original deltas for the matched and semantic-aware comparisons.
+
+![Fig. 3a. Gemini test PR-AUC values and semantic-minus-original deltas.](figures/fig03a_gemini_pr_auc_values_and_deltas.png)
+
+![Fig. 3b. GPT-4o mini test PR-AUC values and semantic-minus-original deltas.](figures/fig03b_gpt4o_mini_pr_auc_values_and_deltas.png)
+
+### Table 3. Selected Original Versus Semantic-Aware Models on the Held-Out Test Split
 
 Each pair is selected by validation PR-AUC before test evaluation.
 
@@ -298,17 +301,21 @@ Each pair is selected by validation PR-AUC before test evaluation.
 | GPT-4o mini | Selected original model | 0.7708 | 0.4450 | 0.4278 |
 | GPT-4o mini | Semantic-aware model | 0.7723 | 0.4429 | 0.4308 |
 
-**Supporting result figures:**
+For Gemini, the semantic-aware PR-AUC improvement is positive with paired-bootstrap 95% interval `[0.0007, 0.0147]` and approximate `p = 0.029`. For GPT-4o mini, the semantic-aware PR-AUC delta is negative and the interval crosses zero, `[-0.0069, 0.0026]`, with approximate `p = 0.398`. For the GPT-4o mini RF500 metafeature baseline, the direct PR-AUC gain is positive with interval `[0.0023, 0.0144]` and approximate `p = 0.008`.
 
-| Figure file | What it supports |
-|---|---|
-| [Fig. 3a: Gemini PR-AUC values and deltas](figures/fig03a_gemini_pr_auc_values_and_deltas.png) | Visual check for Gemini original-versus-semantic PR-AUC values and semantic-minus-original intervals. |
-| [Fig. 3b: GPT-4o mini PR-AUC values and deltas](figures/fig03b_gpt4o_mini_pr_auc_values_and_deltas.png) | Visual check for GPT original-versus-semantic PR-AUC values and semantic-minus-original intervals. |
-| [Fig. 4: Selected precision-recall curves](figures/fig04_selected_precision_recall_curves_gemini.png) | Curve-level view of representative original and semantic models on the held-out test split. |
+The precision-recall curve below supports the PR-AUC comparisons for representative Gemini original and semantic models. We emphasize PR-AUC because conflict examples are uncommon.
+
+![Fig. 4. Selected test precision-recall curves for representative original and semantic models using the Gemini semantic dataset.](figures/fig04_selected_precision_recall_curves_gemini.png)
+
+---
+
+## Why Feature-Rich Models Gain Less
+
+Semantic labels do not always produce larger gains because of redundancy. If original full features can already predict the semantic labels, then adding those labels provides limited new information. Several semantic labels are highly predictable from the original full representation, which suggests that original text, social, and learned features already encode much of the information that the semantic labels make explicit.
 
 ### Table 4. Semantic Label Predictability from Original Full Features
 
-High ROC-AUC here indicates that original features already encode much of the same information captured by the semantic label.
+High predictability indicates redundancy with the original representation.
 
 | Semantic label | Gemini ROC-AUC | GPT-4o mini ROC-AUC |
 |---|---:|---:|
@@ -320,113 +327,73 @@ High ROC-AUC here indicates that original features already encode much of the sa
 | Cross Community Comparison | 0.790 | 0.814 |
 | Neutral Information | 0.814 | 0.810 |
 
----
-
-## Main Findings
-
-1. We find that semantic labels improve the simple RF500 metafeature baseline for both annotators.
-2. Gemini improves RF500 metafeature test PR-AUC from 0.2782 to 0.2846.
-3. GPT-4o mini improves RF500 metafeature test PR-AUC from 0.2790 to 0.2874.
-4. The strongest semantic-aware result comes from the Gemini-based system, improving ROC-AUC from 0.7706 to 0.7720, PR-AUC from 0.4408 to 0.4487, and F1 from 0.3391 to 0.4363.
-5. Semantic gains are smaller in feature-rich models because many semantic labels are already predictable from the original representation.
-6. We interpret semantic enrichment as partially redundant signal rather than universally additive signal.
+Grouped SHAP analysis supports the same conclusion. The semantic-aware models primarily rely on LSTM embeddings, social embeddings, and metafeatures. Raw semantic labels contribute little directly once those richer original representations are present. Semantic interactions and residuals contribute more than raw labels, but their total contribution remains small relative to the original learned and social feature groups.
 
 ---
 
-## Reproduction Checklist
+## Reproducibility Checklist
 
-To reproduce the reported artifacts:
+To reproduce the reported workflow, we use this order:
 
-1. Download the original Reddit conflict-prediction files from the SNAP project pages.
-2. Place the original files in the expected project folder or update the notebook path variables.
-3. Add API keys through Colab secrets or environment variables.
-4. Run the Gemini annotation notebook.
-5. Run the GPT-4o mini annotation notebook.
-6. Run the Gemini training/evaluation notebook.
-7. Run the GPT-4o mini training/evaluation notebook.
-8. Compare the generated metrics against the tables in this README.
-9. Use the linked supporting figures as visual checks, not as the primary source of numerical results.
+1. Obtain the original Reddit conflict-prediction files from SNAP.
+2. Place the required original files in the expected Google Drive or local project directory.
+3. Run the Gemini semantic annotation notebook, or use the released Gemini semantic annotations.
+4. Run the GPT-4o mini semantic annotation notebook, or use the released GPT semantic annotations.
+5. Run the Gemini training/evaluation notebook.
+6. Run the GPT-4o mini training/evaluation notebook.
+7. Compare the generated tables and figures against the values summarized in this README.
 
-We recommend keeping large raw data, generated `.parquet`, `.csv`, `.jsonl`, model files, and intermediate outputs outside Git. GitHub blocks files larger than 100 MiB in normal Git repositories, so large artifacts should stay on Kaggle, Google Drive, or another external artifact store.
+Expected core outputs include:
+
+| Output type | Expected content |
+|---|---|
+| Semantic annotations | Full-corpus Gemini and GPT-4o mini primary labels, boolean labels, and audit reasons. |
+| Model predictions | Held-out validation and test predictions for original and semantic models. |
+| Metrics tables | ROC-AUC, PR-AUC, F1, precision, recall, bootstrap intervals, and selected-model summaries. |
+| Figures | The five paper figures stored in `figures/`. |
 
 ---
 
 ## Figure File Manifest
 
-The figures are included as supporting material. We do not display them as one large gallery in this README; instead, we link each figure near the section where it is useful.
+These are the only figure files expected in the minimal paper-reproduction repo.
 
-| File | Paper role | README placement |
+| Paper figure | File | Used in this README section |
 |---|---|---|
-| `figures/fig01_reddit_community_space.png` | Fig. 1 | Dataset and Prediction Target |
-| `figures/fig02_semantic_enrichment_pipeline.png` | Fig. 2 | Leakage-Controlled Semantic Annotation |
-| `figures/fig03a_gemini_pr_auc_values_and_deltas.png` | Fig. 3 top panel | Results |
-| `figures/fig03b_gpt4o_mini_pr_auc_values_and_deltas.png` | Fig. 3 bottom panel | Results |
-| `figures/fig04_selected_precision_recall_curves_gemini.png` | Fig. 4 | Results |
+| Fig. 1 | `figures/fig01_reddit_community_space.png` | Dataset and Prediction Target |
+| Fig. 2 | `figures/fig02_semantic_enrichment_pipeline.png` | Leakage-Controlled Semantic Annotation |
+| Fig. 3 top | `figures/fig03a_gemini_pr_auc_values_and_deltas.png` | Main Results |
+| Fig. 3 bottom | `figures/fig03b_gpt4o_mini_pr_auc_values_and_deltas.png` | Main Results |
+| Fig. 4 | `figures/fig04_selected_precision_recall_curves_gemini.png` | Main Results |
+
+If the figures do not render on GitHub, check that the `figures/` folder is committed at the repository root and that the filenames match this manifest exactly.
 
 ---
 
-## What Not to Commit
+## Citation
 
-Even though we do not include a separate `.gitignore`, we still recommend not committing the following files:
-
-| Do not commit | Reason |
-|---|---|
-| API keys or `.env` files | They are private credentials. |
-| Raw SNAP data | The original dataset should be obtained from SNAP. |
-| Large generated outputs | They can exceed GitHub file limits and make the repo hard to clone. |
-| Google Drive cache files | They are machine-specific. |
-| Colab checkpoint folders | They are temporary notebook artifacts. |
-| Model binaries or large prediction dumps | Store these on Kaggle, Drive, or release artifacts instead. |
-
----
-
-## Citation Information
-
-If you use this repository, cite the paper:
+If you use this repository or the generated semantic annotations, please cite the paper:
 
 ```bibtex
 @inproceedings{thang2026semanticedge,
   title     = {Semantic Edge Enrichment for Inter-Community Conflict Prediction in Reddit},
-  author    = {Thang, Ha Viet},
+  author    = {Ha Viet Thang},
   booktitle = {Proceedings of CSoNet 2026},
   year      = {2026},
-  note      = {Code and generated semantic artifacts released for reproduction}
+  note      = {Code and generated semantic annotations released for reproducibility}
 }
 ```
 
-Also cite the original Reddit conflict-prediction work:
-
-```bibtex
-@inproceedings{kumar2018community,
-  title     = {Community Interaction and Conflict on the Web},
-  author    = {Kumar, Srijan and Hamilton, William L. and Leskovec, Jure and Jurafsky, Dan},
-  booktitle = {Proceedings of The Web Conference 2018},
-  pages     = {933--943},
-  year      = {2018},
-  publisher = {ACM},
-  doi       = {10.1145/3178876.3186141}
-}
-```
+Please also cite the original Reddit conflict-prediction work and SNAP data pages when using the underlying task or corpus.
 
 ---
 
-## Source Links
+## Responsible Use
 
-We use the following project and documentation sources:
-
-| Source | Link |
-|---|---|
-| GitHub README guidance | https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes |
-| GitHub Markdown relative links and image paths | https://docs.github.com/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax |
-| GitHub large-file guidance | https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github |
-| SNAP Reddit Hyperlink Network | https://snap.stanford.edu/data/soc-RedditHyperlinks.html |
-| SNAP Community Interaction and Conflict on the Web | https://snap.stanford.edu/conflict/ |
-| OpenAI GPT-4o mini documentation | https://developers.openai.com/api/docs/models/gpt-4o-mini |
-| OpenAI Structured Outputs documentation | https://developers.openai.com/api/docs/guides/structured-outputs |
-| Google Gemini API documentation | https://ai.google.dev/gemini-api/docs |
+We release this artifact for research reproduction, model comparison, and aggregate analysis of online community dynamics. We do not recommend using the models for automatic punishment of users or communities. The semantic labels are LLM-generated annotations, not human gold labels or causal explanations. Any applied moderation use should include human review, platform-specific validation, and careful consideration of false positives.
 
 ---
 
-## Notes on Scope and Responsible Use
+## Summary of Main Findings
 
-We built this repository for research reproduction and analysis. The models are intended for aggregate study of inter-community dynamics and decision support, not automatic punishment of users or communities. The semantic annotations are LLM outputs, not human gold labels or causal explanations. Results may vary with prompt wording, provider behavior, software versions, hardware, random seeds, and future changes to Reddit behavior.
+We find that semantic enrichment helps most clearly when the base model has limited semantic access. Both Gemini and GPT-4o mini improve the RF500 metafeature baseline. In feature-rich settings, the semantic labels are partly redundant with original text, social, graph, and learned representations. The best Gemini semantic-aware model improves ROC-AUC, PR-AUC, and F1 over the selected original system, while the analogous GPT-4o mini semantic-aware model improves ROC-AUC and F1 slightly but does not improve PR-AUC. The main lesson is that semantic enrichment is valuable, but it must be modeled carefully rather than added automatically.
