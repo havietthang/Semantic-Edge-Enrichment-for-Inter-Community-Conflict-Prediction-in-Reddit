@@ -1,4 +1,4 @@
-# Semantic Edge Enrichment for Inter-Community Conflict Prediction in Reddit
+# Semantic Edge Enrichment with Large Language Models for Improved Inter-Community Conflictb Prediction in Reddit
 
 We use LLM-derived semantic labels to improve and explain inter-community conflict prediction in Reddit cross-community links. We revisit the Stanford SNAP Reddit Hyperlink Network conflict-prediction setting and ask whether simple plain-language semantic labels can add useful predictive signal beyond the original handcrafted, social, graph, and text features.
 
