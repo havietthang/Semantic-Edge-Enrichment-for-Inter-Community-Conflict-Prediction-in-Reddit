@@ -2,7 +2,7 @@
 
 We use LLM-derived semantic labels to improve and explain inter-community conflict prediction in Reddit cross-community links. We revisit the Stanford SNAP Reddit Hyperlink Network conflict-prediction setting and ask whether simple plain-language semantic labels can add useful predictive signal beyond the original handcrafted, social, graph, and text features.
 
-We annotate all **116,224** crosslink entries with two LLM annotators: **Gemini 2.5 Flash-Lite** and **GPT-4o mini**. Each annotator sees only the recovered post text, source subreddit, target subreddit, and a non-outcome text-quality flag. We hide the outcome label, train/validation/test split, future behavior, target-derived features, and model predictions from the annotators.
+We annotated all **116,224** crosslink entries with two LLM annotators: **Gemini 2.5 Flash-Lite** and **GPT-4o mini**. Each annotator sees only the recovered post text, source subreddit, target subreddit, and a non-outcome text-quality flag. We hide the outcome label, train/validation/test split, future behavior, target-derived features, and model predictions from the annotators.
 
 Our main conclusion is that semantic enrichment is useful, but not automatic. Semantic labels improve the simple RF500 metafeature baseline for both annotators. In feature-rich models that already use LSTM, social, graph, and metafeature representations, gains are smaller because many semantic labels are already predictable from the original features. The strongest result comes from the Gemini-based redundancy-aware semantic system.
 
