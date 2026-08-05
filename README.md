@@ -372,7 +372,7 @@ If the figures do not render on GitHub, check that the `figures/` folder is comm
 
 ## Citation
 
-If you use this repository or the generated semantic annotations, please cite the paper:
+If you use this repository or the generated semantic annotations, please cite the paper (not yet published):
 
 ```bibtex
 @inproceedings{thang2026semanticedge,
